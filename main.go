@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/timpinoy/bd-aggregator/internal/config"
+	"log"
 )
 
 func main() {
 	cfg, err := config.Read()
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error reading config: %v", err)
 	}
 
 	err = cfg.SetUser("tim")
@@ -18,7 +19,7 @@ func main() {
 
 	cfg, err = config.Read()
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error reading config: %v", err)
 	}
 
 	fmt.Println(cfg)

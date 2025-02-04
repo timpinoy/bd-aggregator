@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -25,15 +24,17 @@ func Read() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		return Config{}, err
 	}
+
 	err = json.Unmarshal(content, &cfg)
 	if err != nil {
 		return Config{}, err
 	}
-	fmt.Println(cfg)
+
 	return cfg, nil
 }
 
@@ -51,13 +52,16 @@ func write(cfg *Config) error {
 	if err != nil {
 		return err
 	}
+
 	filePath, err := getConfigFilePath()
 	if err != nil {
 		return err
 	}
+
 	err = os.WriteFile(filePath, data, 0644)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
