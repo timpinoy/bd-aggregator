@@ -15,3 +15,14 @@ WHERE id = $1 LIMIT 1;
 -- name: GetUserByName :one
 SELECT * FROM users
 WHERE name = $1 LIMIT 1;
+
+-- name: DeleteUsers :exec
+DELETE FROM users;
+
+-- name: DeleteUser :exec
+DELETE FROM users
+ WHERE id = $1;
+
+-- name: DeleteUserByName :exec
+DELETE FROM users
+WHERE name = $1;

@@ -94,6 +94,14 @@ func handlerRegister(s *state, cmd command) error {
 	return nil
 }
 
+func handlerReset(s *state, cmd command) error {
+	err := s.db.DeleteUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("DeleteUsers failed: %v", err)
+	}
+	return nil
+}
+
 func main() {
 	cfg, err := config.Read()
 	if err != nil {
@@ -111,6 +119,7 @@ func main() {
 	c := commands{commands: make(map[string]func(*state, command) error)}
 	c.register("login", handlerLogin)
 	c.register("register", handlerRegister)
+	c.register("reset", handlerReset)
 
 	if osArgs := os.Args; len(osArgs) < 2 {
 		fmt.Println("Usage: cli <command> [args...]")
