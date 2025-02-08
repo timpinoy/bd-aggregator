@@ -102,6 +102,31 @@ func handlerReset(s *state, cmd command) error {
 	return nil
 }
 
+func handlerUsers(s *state, cmd command) error {
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("GetUsers failed: %v", err)
+	}
+
+	for _, u := range users {
+		if u.Name == s.cfg.CurrentUserName {
+			fmt.Printf("* %s (current)\n", u.Name)
+		} else {
+			fmt.Printf("* %s\n", u.Name)
+		}
+	}
+	return nil
+}
+
+func handlerAggregate(s *state, cmd command) error {
+	feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return fmt.Errorf("fetch feed: %v", err)
+	}
+	fmt.Println(feed)
+	return nil
+}
+
 func main() {
 	cfg, err := config.Read()
 	if err != nil {
@@ -120,6 +145,8 @@ func main() {
 	c.register("login", handlerLogin)
 	c.register("register", handlerRegister)
 	c.register("reset", handlerReset)
+	c.register("users", handlerUsers)
+	c.register("agg", handlerAggregate)
 
 	if osArgs := os.Args; len(osArgs) < 2 {
 		fmt.Println("Usage: cli <command> [args...]")
@@ -127,7 +154,12 @@ func main() {
 	}
 
 	cmd := command{name: os.Args[1], args: os.Args[2:]}
-	err = c.commands[os.Args[1]](s, cmd)
+
+	f, ok := c.commands[os.Args[1]]
+	if !ok {
+		log.Fatalf("command not found\n")
+	}
+	err = f(s, cmd)
 	if err != nil {
 		log.Fatal(err)
 	}
