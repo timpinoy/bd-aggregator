@@ -60,14 +60,6 @@ func handlerRegister(s *state, cmd command) error {
 		return fmt.Errorf("wrong number of arguments")
 	}
 
-	/*	u, err := s.db.GetUserByName(context.Background(), cmd.args[0])
-		if err != nil {
-			return fmt.Errorf("user check failed: %v", err)
-		}
-		if &u != nil {
-			os.Exit(1)
-		}*/
-
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return fmt.Errorf("UUID generation failed: %v", err)
@@ -91,6 +83,34 @@ func handlerRegister(s *state, cmd command) error {
 	}
 
 	fmt.Printf("Registered user: %s\n", cmd.args[0])
+	return nil
+}
+
+func handlerAddFeed(s *state, cmd command) error {
+	if len(cmd.args) != 2 {
+		return fmt.Errorf("wrong number of arguments")
+	}
+
+	user, err := s.db.GetUserByName(context.Background(), s.cfg.CurrentUserName)
+
+	id, err := uuid.NewUUID()
+	if err != nil {
+		return fmt.Errorf("UUID generation failed: %v", err)
+	}
+	cfp := database.CreateFeedParams{
+		ID:        id,
+		Name:      cmd.args[0],
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Url:       cmd.args[1],
+		UserID:    user.ID,
+	}
+
+	_, err = s.db.CreateFeed(context.Background(), cfp)
+	if err != nil {
+		return fmt.Errorf("CreateFeed failed: %v", err)
+	}
+	fmt.Printf("Added feed %s\n", cfp)
 	return nil
 }
 
@@ -147,6 +167,7 @@ func main() {
 	c.register("reset", handlerReset)
 	c.register("users", handlerUsers)
 	c.register("agg", handlerAggregate)
+	c.register("addfeed", handlerAddFeed)
 
 	if osArgs := os.Args; len(osArgs) < 2 {
 		fmt.Println("Usage: cli <command> [args...]")
